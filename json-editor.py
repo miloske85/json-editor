@@ -8,7 +8,7 @@ import wx, json
 
 class Pyjson(wx.Frame):
 
-    appVersion = '0.2.5 beta'
+    appVersion = '0.2.6 beta'
 
     def __init__(self, *args, **kwargs):
         super(Pyjson,self).__init__(*args, **kwargs)
@@ -103,7 +103,7 @@ class Pyjson(wx.Frame):
     def unserialize(self,e):
         inputText = self.inputText.GetValue()
 
-        if self.validateLength(inputText):
+        if self.validate(inputText):
 
             parsed = json.loads(inputText) #unserialize
             #serialize, but pretty print
@@ -115,12 +115,12 @@ class Pyjson(wx.Frame):
             self.setStatusBar('Unserialized')
 
         else:
-            wx.MessageBox('You haven\'t entered anything', 'Warning', wx.OK | wx.ICON_EXCLAMATION)
+            wx.MessageBox('Invalid input data', 'Warning', wx.OK | wx.ICON_EXCLAMATION)
 
     def serialize(self,e):
         inputText = self.outputText.GetValue()
 
-        if self.validateLength(inputText):
+        if self.validate(inputText):
 
             #convert to JSON object
             parsed = json.loads(inputText)
@@ -134,16 +134,23 @@ class Pyjson(wx.Frame):
             self.setStatusBar('Serialized')
 
         else:
-            wx.MessageBox('You haven\'t entered anything', 'Warning', wx.OK | wx.ICON_EXCLAMATION)
+            wx.MessageBox('Invalid input data', 'Warning', wx.OK | wx.ICON_EXCLAMATION)
 
-    def validateLength(self,data):
+    def validate(self,data):
         '''
             Check if valid data was passed
         '''
-        if len(data) > 0:
+        if len(data) == 0:
+            return False #no need to process further
+
+        #check for valid json
+        try:
+            json.loads(data)
             return True;
-        else:
-            return False;
+
+        except ValueError as e:
+            #if the exception was thrown, input data is not valid JSON
+            return False
 
     def clearAll(self,e):
         #clear both TextCtrl
@@ -191,7 +198,6 @@ class Pyjson(wx.Frame):
 
 
 
-# if __name__ == '__main__':
 app = wx.App()
 Pyjson(None)
 app.MainLoop()
